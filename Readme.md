@@ -38,7 +38,7 @@
 
 
 
-Because ICMPipe utilizes raw sockets to construct network packets, you must have the necessary privileges (`root` or `CAP\_NET\_RAW` capabilities under Linux).
+Because ICMPipe utilizes raw sockets to construct network packets, you must have the necessary privileges (`root` or `CAP\_NET\_RAW` capabilities under Linux)
 
 
 
