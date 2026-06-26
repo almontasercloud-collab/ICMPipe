@@ -40,7 +40,8 @@ func main() {
 	defer c.Close()
 
 	// Bind to interface
-	pconn := ipv4.NewPacketConn(c)
+	pconn := c.IPv4PacketConn()
+
 	if err := pconn.SetControlMessage(ipv4.FlagInterface, true); err != nil {
 		panic(err)
 	}
@@ -67,9 +68,6 @@ func main() {
 	_, err = pconn.WriteTo(b, &ipv4.ControlMessage{
 		IfIndex: iface.Index,
 	}, dst)
-	if err != nil {
-		panic(err)
-	}
 
 	// Listen for replies
 	var encodedData []byte
