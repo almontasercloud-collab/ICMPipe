@@ -8,7 +8,7 @@
 
 
 
-\*\*ICMPipe\*\* is a lightweight, high-performance network utility designed to channel, encapsulate, or stream data over raw network infrastructure using the Internet Control Message Protocol (ICMP). By bypassing traditional transport layers (TCP/UDP), ICMPipe provides an alternative pipeline for network diagnostics, specialized signaling, or low-level network testing.
+\*\*ICMPipe\*\* is a lightweight, high-performance network utility designed to channel, encapsulate, or stream data over raw network infrastructure using the Internet Control Message Protocol (ICMP). By bypassing traditional transport layers (TCP/UDP), ICMPipe provides an alternative pipeline for network diagnostics, specialized signaling, or low-level network testing..
 
 
 
@@ -38,7 +38,7 @@
 
 
 
-Because ICMPipe utilizes raw sockets to construct network packets, you must have the necessary privileges (`root` or `CAP\_NET\_RAW` capabilities under Linux)
+Because ICMPipe utilizes raw sockets to construct network packets, you must have the necessary privileges (`root` or `CAP\_NET\_RAW` capabilities under Linux).
 
 
 
