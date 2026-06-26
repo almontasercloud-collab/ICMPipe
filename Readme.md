@@ -16,7 +16,7 @@
 
 ## Installation
 
-### ICMPipe Server [Windows]
+### 1- ICMPipe Server [Windows]
 
 - Download and install npcap [Here](https://npcap.com/).
 - Download ICMPipe_Server.exe or pull the full repo if you wish to make changes in the source code.
@@ -39,7 +39,7 @@ For example:  .\ICMPipe-Server.exe 1 172.16.2.5
 "Listening on interface [1] [interface name] for ICMP Echo Requests from 172.16.2.5"
 ```
 
-### ICMPipe Server [Linux]
+### 2- ICMPipe Client [Linux]
 
 - First you need to Install required golang kit. 
 
