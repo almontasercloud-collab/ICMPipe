@@ -18,22 +18,22 @@
 
 ## ICMPipe Server [Windows]
 
-- 1- Download and install npcap [Here](https://npcap.com/).
-- 2- Download ICMPipe_Server.exe or pull the repo if you wish to make changes in the source code.
-- 3- Invoke a new cmd with administrator privilage.
-- 4- navigate to ICMPipe_Server.exe directory and issue the command: 
+- Download and install npcap [Here](https://npcap.com/).
+- Download ICMPipe_Server.exe or pull the repo if you wish to make changes in the source code.
+- Invoke a new cmd with administrator privilage.
+- navigate to ICMPipe_Server.exe directory and issue the command: 
 
 ```bash
 .\ICMPipe-Server.exe
 ```
 
-- 5- choose the client connected interface and specfiy it's IP address:
+- choose the client connected interface and specfiy it's IP address:
 
 ```bash
 For example:  .\ICMPipe-Server.exe 1 172.16.2.5
 ```
 
-- 6- you shoud see a message:
+- you shoud see a message:
 
 ```bash
 "Listening on interface [1] [interface name] for ICMP Echo Requests from 172.16.2.5"
@@ -41,7 +41,7 @@ For example:  .\ICMPipe-Server.exe 1 172.16.2.5
 
 ## ICMPipe Server [Linux]
 
-- 1- First you need to Install required golang kit. 
+- First you need to Install required golang kit. 
 
 ```bash
 sudo apt install golang -y
