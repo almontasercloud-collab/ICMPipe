@@ -21,3 +21,8 @@ Clone the repository and compile the binaries:
 
 ```bash
 git clone https://github.com/almontasercloud-collab/ICMPipe.git
+
+---
+
+### Client Installation
+
