@@ -28,3 +28,26 @@ The client code is writen for Linux-based Systems , First you need to Install re
 sudo apt install golang -y
 ```
 
+```bash
+cd client
+```
+
+```bash
+go mod init icmpope_client.go
+```
+
+```bash
+go mod tidy
+```
+
+```bash
+go build -o ICMPipe icmpope_client.go
+```
+
+```bash
+sudo mv ICMPipe /usr/local/bin && sudo chmod -x /usr/local/bin/ICMPipe
+```
+
+```bash
+ICMPipe -p "full path of the file to be pulled using ICMP" -i "Interface Name eg: eth0" -ip "ICMPipe Server IP" -O "output file path" 
+```
