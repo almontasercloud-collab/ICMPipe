@@ -8,9 +8,7 @@
 ## Features
 
 - **Raw Socket Interaction:** Directly crafts and parses custom ICMP payloads.
-- **Data Encapsulation:** Pipes standard input stream (`stdin`) or structured data directly through ICMP Echo Request/Reply mechanisms.
 - **Stealth & Diagnostics:** Ideal for advanced network architecture testing, firewall behavior analysis, and environment validation.
-- **Cross-Platform Support:** Compatible across Unix-like systems (Linux, macOS).
 
 ---
 
