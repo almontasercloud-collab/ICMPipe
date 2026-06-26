@@ -39,35 +39,41 @@ For example:  .\ICMPipe-Server.exe 1 172.16.2.5
 
 ### 2- ICMPipe Client [Linux]
 
-- First you need to Install required golang kit. 
+- Install golang:
 
 ```bash
 sudo apt install golang -y
 ```
+- Install libpcap:
 
 ```bash
 apt install libpcap-dev
 ```
 
-```bash
-cd client
-```
+- Download **./client/icmpipe_client.go** (you need only this file).
+- navigate to icmpipe_client.go and initiate go:
 
 ```bash
 go mod init icmpipe_client.go
 ```
+- use tidy to download dependancies:
 
 ```bash
 go mod tidy
 ```
 
+- Build ICMPipe Executable:
+
 ```bash
 go build -o ICMPipe icmpope_client.go
 ```
 
+- Move the executable to your system bin and adjust privilages: (optinal)(recommended)
+
 ```bash
 sudo mv ICMPipe /usr/local/bin && sudo chmod -x /usr/local/bin/ICMPipe
 ```
+- Issue the command **ICMPipe** to see command usage for example: 
 
 ```bash
 ICMPipe -p "full path of the file to be pulled using ICMP" -i "Interface Name eg: eth0" -ip "ICMPipe Server IP" -O "output file path" 
