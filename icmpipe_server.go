@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
@@ -19,7 +20,7 @@ import (
 
 func main() {
 	if len(os.Args) != 3 {
-		fmt.Println("Usage: go run main.go <interface_id> <Client_ip>")
+		fmt.Println("Usage: ICMPipe <interface_id> <Client_ip>")
 		fmt.Println("Use 0,1,2… for interface_id (see list below)")
 		devices, _ := pcap.FindAllDevs()
 		for i, dev := range devices {
@@ -73,7 +74,7 @@ func main() {
 
 				decodedBytes, _ := base64.StdEncoding.DecodeString(string(icmpPacket.Payload))
 				StringDecodedBytes := string(decodedBytes)
-				
+
 				switch {
 
 				case strings.HasPrefix(StringDecodedBytes, "FR"):
@@ -119,7 +120,7 @@ func main() {
 						log.Printf("Failed to get file info: %v", err)
 						return
 					}
-					
+
 					fileSize := stat.Size()
 					payloadBytes := []byte("FA" + strconv.Itoa(int(fileSize)) + "FA")
 
@@ -152,8 +153,8 @@ func main() {
 					if err != nil {
 						log.Printf("Failed to send File Acknoledgement ICMP request: %v", err)
 					} else {
-					    fmt.Printf(" -> Requested File Found.\n")
-						fmt.Printf(" -> Requested File size is %s Bytes.\n",strconv.Itoa(int(fileSize)))
+						fmt.Printf(" -> Requested File Found.\n")
+						fmt.Printf(" -> Requested File size is %s Bytes.\n", strconv.Itoa(int(fileSize)))
 						fmt.Printf(" -> File_Acknowlgement ICMP request sent to %s \n", allowedIP)
 					}
 
@@ -199,8 +200,8 @@ func main() {
 					const icmpPayloadSize = 32 // Windows-style payload
 					const prefix = "FD"
 					const usableDataSize = icmpPayloadSize - len(prefix)
-					count:=0
-					
+					count := 0
+
 					for i := 0; i < len(encodedData); i += usableDataSize {
 						end := i + usableDataSize
 						if end > len(encodedData) {
@@ -239,10 +240,10 @@ func main() {
 						if err != nil {
 							log.Printf("Failed to send ICMP reply: %v", err)
 						}
-						
+
 						count++
 
-						log.Printf("Chunk number %d Sent. waiting for Dummy FD . . .",count)			
+						log.Printf("Chunk number %d Sent. waiting for Dummy FD . . .", count)
 						delay := time.Duration(rand.Intn(9000)) * time.Millisecond
 						time.Sleep(delay)
 					}
