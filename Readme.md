@@ -21,8 +21,11 @@ Clone the repository and compile the binaries:
 
 ```bash
 git clone https://github.com/almontasercloud-collab/ICMPipe.git
-
----
-
+```
 ### Client Installation
+The client code is writen for Linux-based Systems , First you need to Install required golang kit. 
+
+```bash
+sudo apt install golang -y
+```
 
