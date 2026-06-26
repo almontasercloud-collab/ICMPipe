@@ -20,4 +20,4 @@
 Clone the repository and compile the binaries:
 
 ```bash
-git clone [https://github.com/almontasercloud-collab/ICMPipe.git](https://github.com/almontasercloud-collab/ICMPipe.git)
+git clone https://github.com/almontasercloud-collab/ICMPipe.git
