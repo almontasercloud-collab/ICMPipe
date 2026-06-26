@@ -4,11 +4,12 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"golang.org/x/net/icmp"
-	"golang.org/x/net/ipv4"
 	"net"
 	"os"
 	"time"
+
+	"golang.org/x/net/icmp"
+	"golang.org/x/net/ipv4"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	if *dir == "" || *ifaceName == "" || *dstIP == "" || *output == "" {
-		fmt.Println("Usage: pring -p <directory> -i <interface> -ip <ip> -O <output_file>")
+		fmt.Println("Usage: ICMPipe -p <directory> -i <interface> -ip <ip> -O <output_file>")
 		os.Exit(1)
 	}
 
@@ -78,7 +79,7 @@ func main() {
 	_ = c.SetReadDeadline(deadline)
 
 	for {
-		n, _, peer, err := c.ReadFrom(buf)
+		n, peer, err := c.ReadFrom(buf)
 		if err != nil {
 			break // timeout
 		}
