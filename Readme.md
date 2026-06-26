@@ -53,7 +53,7 @@ apt install libpcap-dev
 - Download **./client/icmpipe_client.go** from this repo:
 
 ```bash
-wget https://raw.githubusercontent.com/user/repo/main/client/icmpipe_client.go
+[wget https://raw.githubusercontent.com/user/repo/main/client/icmpipe_client.go](https://github.com/almontasercloud-collab/ICMPipe/blob/main/client/icmpipe_client.go)
 ```
 
 - navigate to icmpipe_client.go and initiate go:
