@@ -1,40 +1,28 @@
-\#ICMPipe
+\# ICMPipe
 
 
 
-ICMPipe is an experimental client/server communication system built in Go that uses ICMP packets as a transport channel for structured data exchange.
+\[!\[License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+\[!\[Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS-lightgrey)](#)
 
 
 
-This project explores how low-level network protocols can be used for custom message delivery and packet manipulation using raw ICMP and pcap-based processing.
+\*\*ICMPipe\*\* is a lightweight, high-performance network utility designed to channel, encapsulate, or stream data over raw network infrastructure using the Internet Control Message Protocol (ICMP). By bypassing traditional transport layers (TCP/UDP), ICMPipe provides an alternative pipeline for network diagnostics, specialized signaling, or low-level network testing.
 
 
 
-\---
+\## Features
 
 
 
-\##Disclaimer
+\- \*\*Raw Socket Interaction:\*\* Directly crafts and parses custom ICMP payloads.
 
+\- \*\*Data Encapsulation:\*\* Pipes standard input stream (`stdin`) or structured data directly through ICMP Echo Request/Reply mechanisms.
 
+\- \*\*Stealth \& Diagnostics:\*\* Ideal for advanced network architecture testing, firewall behavior analysis, and environment validation.
 
-This project is strictly for educational and research purposes.  
-
-It demonstrates packet-level communication techniques and should not be used in production environments.
-
-
-
-\---
-
-
-
-\##Overview
-
-
-
-Traditional communication systems rely on TCP or UDP.  
-
-ICMPipe experiments with using ICMP (Internet Control Message Protocol) as a data carrier to implement a lightweight messaging channel between a client and a server.
+\- \*\*Cross-Platform Support:\*\* Compatible across Unix-like systems (Linux, macOS).
 
 
 
@@ -42,7 +30,31 @@ ICMPipe experiments with using ICMP (Internet Control Message Protocol) as a dat
 
 
 
+\## Installation
 
 
 
+\### Prerequisites
+
+
+
+Because ICMPipe utilizes raw sockets to construct network packets, you must have the necessary privileges (`root` or `CAP\_NET\_RAW` capabilities under Linux).
+
+
+
+\### Building from Source
+
+
+
+Clone the repository and compile the binaries:
+
+
+
+```bash
+
+git clone \[https://github.com/almontasercloud-collab/ICMPipe.git](https://github.com/almontasercloud-collab/ICMPipe.git)
+
+cd ICMPipe
+
+make
 
