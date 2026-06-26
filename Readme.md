@@ -15,16 +15,9 @@
 ---
 
 ## Installation
-
-### Prerequisites
-
-Because ICMPipe utilizes raw sockets to construct network packets, you must have the necessary privileges (`root` or `CAP_NET_RAW` capabilities under Linux).
-
 ### Building from Source
 
 Clone the repository and compile the binaries:
 
 ```bash
 git clone [https://github.com/almontasercloud-collab/ICMPipe.git](https://github.com/almontasercloud-collab/ICMPipe.git)
-cd ICMPipe
-make
