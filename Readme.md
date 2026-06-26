@@ -50,7 +50,7 @@ sudo apt install golang -y
 apt install libpcap-dev
 ```
 
-- Download **./client/icmpipe_client.go** from this repo:
+- Download **icmpipe_client.go** from this repo:
 
 ```bash
 https://github.com/almontasercloud-collab/ICMPipe/blob/main/client/icmpipe_client.go
