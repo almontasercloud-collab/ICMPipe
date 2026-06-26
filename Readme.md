@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey)](#)
 
-**ICMPipe** is a lightweight, high-performance network utility designed to channel, encapsulate, or stream data over raw network infrastructure using the Internet Control Message Protocol (ICMP). By bypassing traditional transport layers (TCP/UDP), ICMPipe provides an alternative pipeline for network diagnostics, specialized signaling, or low-level network testing.
+**ICMPipe** is an ICMP-based client/server communication experiment built with Go and libpcap. Exploring packet-level data transport over raw network protocols.
 
 ## Features
 
@@ -17,7 +17,7 @@
 ## Installation
 ### Building from Source
 
-Clone the repository and compile the binaries:
+Clone the repository:
 
 ```bash
 git clone https://github.com/almontasercloud-collab/ICMPipe.git
