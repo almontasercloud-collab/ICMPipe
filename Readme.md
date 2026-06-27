@@ -9,7 +9,7 @@
 
 ## Documentation & Walkthrough
 
-A complete ICMPipe walkthrough, including setup steps and usage examples, is available on my blog:
+For ICMPipe usage instructions and examples, refer to:
 
 [ICMPipe Walkthrough](https://almontaserbabiker.com/posts/ICMPipe/)
 
