@@ -78,8 +78,9 @@ sudo mv ICMPipe /usr/local/bin && sudo chmod -x /usr/local/bin/ICMPipe
 ```bash
 ICMPipe
 ```
-## Example Usage: 
 
-```bash
-ICMPipe -p "full path of the file to be pulled using ICMP" -i "Interface Name eg: eth0" -ip "ICMPipe Server IP" -O "output file path" 
-```
+## Documentation & Walkthrough
+
+A complete ICMPipe walkthrough, including setup steps and usage examples, is available on my blog:
+
+[ICMPipe Walkthrough](https://almontaserbabiker.com/posts/ICMPipe/)
