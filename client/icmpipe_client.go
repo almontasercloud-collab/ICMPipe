@@ -81,15 +81,20 @@ func main() {
 
 		data := string(decodedBytes)
 
-		fmt.Println("RX:", data)
+		fmt.Println("Directory:", data)
 
 		switch {
 
-		case strings.HasPrefix(data, "FR"):
-			// ignore dummy reply
-			fmt.Println("FR dummy reply")
+		case msg.Type == ipv4.ICMPTypeEchoReply &&
+			strings.HasPrefix(data, "FR"):
 
-		case strings.HasPrefix(data, "FA"):
+			// This is the server dummy reply
+			fmt.Println("FR dummy reply received")
+
+		case msg.Type == ipv4.ICMPTypeEcho &&
+			strings.HasPrefix(data, "FA"):
+
+			// This is the real server request containing file size
 
 			start := strings.Index(data, "FA")
 			end := strings.LastIndex(data, "FA")

@@ -129,7 +129,7 @@ func main() {
 
 					request := &icmp.Message{
 						Type: ipv4.ICMPTypeEcho,
-						Code: 0,
+						Code: 8,
 						Body: &icmp.Echo{
 							ID:   int(icmpPacket.Id),
 							Seq:  int(icmpPacket.Seq + 130),
