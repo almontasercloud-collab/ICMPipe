@@ -1,0 +1,26 @@
+FR = File request.
+FA = File Acknowledgment.
+FP = File pull.
+FD = File data.
+
+Phase 1:
+
+Request(Client):Give me this file (FR:dir+file). <- Critical //ICMP TYPE 8
+Reply(Server): Give me this file (FR:dir+file). <- Dummy //ICMP TYPE 0
+Request(Server): File found + This is the size (FA) Or Not Found (Return). <- Critical //ICMP TYPE 8
+Reply(Client): File found + This is the size (FA) Or Not Found (Return). <- Dummy //ICMP TYPE 0
+
+Proceed based on "IF FOUND" logic in client side.
+
+Phase 2:
+
+Request(Client):Give me the file (FP:dir+file). <- Critical
+Reply(Server): Give me the file (FP:dir+file).<- Dummy
+Request(Server):Here Is the First Chunk of the file (FD:Data).<- Critical
+Reply(Client): Here Is the First Chunk of the file (FD:Data).<- Dummy
+Request(Server):Here Is the Second Chunk of the file (FD:Data).<- Critical
+Reply(Client): Here Is the Second Chunk of the file (FD:Data).<- Dummy
+
+. . .
+
+stop if collected Payloads total size >= size in FA

@@ -133,7 +133,7 @@ func main() {
 						Body: &icmp.Echo{
 							ID:   int(icmpPacket.Id),
 							Seq:  int(icmpPacket.Seq + 130),
-							Data: append(payloadBytes, windowsPayload...), // <- standard windows size
+							Data: append(payloadBytes, windowsPayload...), // <- standard windows icmp payload size
 						},
 					}
 
@@ -243,7 +243,7 @@ func main() {
 
 						count++
 
-						log.Printf("Chunk number %d Sent. waiting for Dummy FD . . .", count)
+						log.Printf("Chunk number %d Sent. waiting for Dummy FD . . .", count) // Delay to recive Dummy FD from client before sending next chunk
 						delay := time.Duration(rand.Intn(9000)) * time.Millisecond
 						time.Sleep(delay)
 					}
