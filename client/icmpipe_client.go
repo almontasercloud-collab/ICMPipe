@@ -42,23 +42,26 @@ func main() {
 	fmt.Printf("Using interface: %s (%d)\n", iface.Name, iface.Index)
 
 	// =========================
-	// PHASE 1: FILE REQUEST (FR)
+	// PHASE 1: FR REQUEST
 	// =========================
 
 	frPayload := []byte("FR" + filePath)
-
 	sendICMP(conn, dst, iface, frPayload)
 
-	buf := make([]byte, 1500)
+	buf := make([]byte, 4096)
+
 	var fileSize int
 	found := false
 
-	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+	// =========================
+	// FIXED FA PARSING LOOP
+	// =========================
 
 	for !found {
+
 		n, _, err := conn.ReadFrom(buf)
 		if err != nil {
-			log.Fatalf("Timeout waiting FA")
+			continue
 		}
 
 		msg, err := icmp.ParseMessage(1, buf[:n])
@@ -70,46 +73,70 @@ func main() {
 			continue
 		}
 
-		echo := msg.Body.(*icmp.Echo)
-		data := string(echo.Data)
-
-		if strings.HasPrefix(data, "FR") {
-			fmt.Println(" -> FR Dummy reply received")
+		echo, ok := msg.Body.(*icmp.Echo)
+		if !ok {
 			continue
 		}
 
-		if strings.HasPrefix(data, "FA") {
-			// extract file size
-			raw := strings.TrimSuffix(strings.TrimPrefix(data, "FA"), "FA")
-			fileSize, _ = strconv.Atoi(raw)
+		data := string(echo.Data)
 
-			fmt.Printf(" -> File found. Size: %d bytes\n", fileSize)
+		// ignore FR dummy reply
+		if strings.HasPrefix(data, "FR") {
+			fmt.Println(" -> FR dummy reply received")
+			continue
+		}
+
+		// robust FA extraction (FIX)
+		if strings.Contains(data, "FA") {
+
+			start := strings.Index(data, "FA")
+			end := strings.LastIndex(data, "FA")
+
+			if start == -1 || end <= start {
+				continue
+			}
+
+			raw := data[start+2 : end]
+
+			size, err := strconv.Atoi(raw)
+			if err != nil {
+				fmt.Println(" -> FA parse failed:", raw)
+				continue
+			}
+
+			fileSize = size
 			found = true
+
+			fmt.Printf(" -> FA received. File size: %d bytes\n", fileSize)
 		}
 	}
 
 	// =========================
-	// PHASE 2: FILE PULL (FP)
+	// PHASE 2: FP REQUEST
 	// =========================
 
 	fpPayload := []byte("FP" + filePath)
 	sendICMP(conn, dst, iface, fpPayload)
 
-	fmt.Println(" -> Sent FP request")
+	fmt.Println(" -> FP request sent")
 
 	var (
 		receivedData string
-		totalSize    int
-		chunkCount   int
+		totalBytes   int
+		chunks       int
 	)
 
 	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 
-	for totalSize < fileSize {
+	// =========================
+	// RECEIVE FD CHUNKS
+	// =========================
+
+	for totalBytes < fileSize {
 
 		n, _, err := conn.ReadFrom(buf)
 		if err != nil {
-			log.Fatalf("Timeout receiving FD chunks")
+			continue
 		}
 
 		msg, err := icmp.ParseMessage(1, buf[:n])
@@ -121,7 +148,11 @@ func main() {
 			continue
 		}
 
-		echo := msg.Body.(*icmp.Echo)
+		echo, ok := msg.Body.(*icmp.Echo)
+		if !ok {
+			continue
+		}
+
 		data := string(echo.Data)
 
 		// ignore FP dummy reply
@@ -136,16 +167,17 @@ func main() {
 			chunk = strings.TrimRight(chunk, "\x00")
 
 			receivedData += chunk
-			chunkCount++
+			chunks++
 
-			fmt.Printf(" -> Received chunk %d | total: %d bytes\n", chunkCount, len(receivedData))
+			totalBytes = len(receivedData)
 
-			totalSize = len(receivedData)
+			fmt.Printf(" -> Chunk %d received | total bytes: %d / %d\n",
+				chunks, totalBytes, fileSize)
 		}
 	}
 
 	// =========================
-	// FINAL DECODE + WRITE
+	// DECODE + WRITE FILE
 	// =========================
 
 	decoded, err := base64.StdEncoding.DecodeString(receivedData)
@@ -155,14 +187,14 @@ func main() {
 
 	err = os.WriteFile(output, decoded, 0644)
 	if err != nil {
-		log.Fatalf("Write file failed: %v", err)
+		log.Fatalf("File write failed: %v", err)
 	}
 
 	fmt.Println(" -> File written to:", output)
 }
 
 // =========================
-// ICMP SENDER (MATCH SERVER STYLE)
+// ICMP SEND FUNCTION
 // =========================
 
 func sendICMP(conn *icmp.PacketConn, dst *net.IPAddr, iface *net.Interface, payload []byte) {
@@ -194,6 +226,6 @@ func sendICMP(conn *icmp.PacketConn, dst *net.IPAddr, iface *net.Interface, payl
 	}, dst)
 
 	if err != nil {
-		log.Fatalf("Send ICMP failed: %v", err)
+		log.Fatalf("ICMP send failed: %v", err)
 	}
 }
