@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -16,44 +17,44 @@ import (
 
 func main() {
 
-	if len(os.Args) != 5 {
-		fmt.Println("Usage: ICMPipe <interface> <server_ip> <file_path> <output_file>")
-		return
+	filePath := flag.String("p", "", "file path")
+	ifaceName := flag.String("i", "", "interface")
+	serverIP := flag.String("ip", "", "server ip")
+	output := flag.String("O", "", "output file")
+
+	flag.Parse()
+
+	if *filePath == "" || *ifaceName == "" || *serverIP == "" || *output == "" {
+		fmt.Println("Usage: ICMPipe -p <file> -i <iface> -ip <server> -O <out>")
+		os.Exit(1)
 	}
 
-	ifaceName := os.Args[1]
-	serverIP := os.Args[2]
-	filePath := os.Args[3]
-	output := os.Args[4]
-
-	iface, err := net.InterfaceByName(ifaceName)
+	iface, err := net.InterfaceByName(*ifaceName)
 	if err != nil {
-		log.Fatalf("Interface error: %v", err)
+		log.Fatalf("iface error: %v", err)
 	}
 
 	conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
 	if err != nil {
-		log.Fatalf("ICMP socket error: %v", err)
+		log.Fatalf("icmp error: %v", err)
 	}
 	defer conn.Close()
 
-	dst := &net.IPAddr{IP: net.ParseIP(serverIP)}
-
-	fmt.Printf("[+] Using interface: %s (%d)\n", iface.Name, iface.Index)
-
-	// =========================
-	// PHASE 1: FR (BASE64 ENCODED)
-	// =========================
-
-	fr := base64.StdEncoding.EncodeToString([]byte("FR" + filePath))
-	sendICMP(conn, dst, iface, []byte(fr))
+	dst := &net.IPAddr{IP: net.ParseIP(*serverIP)}
 
 	buf := make([]byte, 4096)
+
+	// =========================
+	// PHASE 1: FR
+	// =========================
+
+	frPayload := base64.StdEncoding.EncodeToString([]byte("FR" + *filePath))
+	send(conn, dst, iface, []byte(frPayload))
 
 	var fileSize int
 	found := false
 
-	fmt.Println("[*] Waiting for FA...")
+	fmt.Println("Waiting FA...")
 
 	for !found {
 
@@ -72,20 +73,23 @@ func main() {
 		}
 
 		echo := msg.Body.(*icmp.Echo)
-		data := string(echo.Data)
 
-		// debug
-		fmt.Println("[RX RAW]:", data)
-
-		// ignore FR dummy reply
-		if strings.HasPrefix(data, "FR") {
+		decodedBytes, err := base64.StdEncoding.DecodeString(string(echo.Data))
+		if err != nil {
 			continue
 		}
 
-		// =========================
-		// FIXED FA PARSING
-		// =========================
-		if strings.Contains(data, "FA") {
+		data := string(decodedBytes)
+
+		fmt.Println("RX:", data)
+
+		switch {
+
+		case strings.HasPrefix(data, "FR"):
+			// ignore dummy reply
+			fmt.Println("FR dummy reply")
+
+		case strings.HasPrefix(data, "FA"):
 
 			start := strings.Index(data, "FA")
 			end := strings.LastIndex(data, "FA")
@@ -98,30 +102,28 @@ func main() {
 
 			size, err := strconv.Atoi(raw)
 			if err != nil {
-				fmt.Println("[!] FA parse error:", raw)
 				continue
 			}
 
 			fileSize = size
 			found = true
 
-			fmt.Printf("[+] FA received. File size: %d bytes\n", fileSize)
+			fmt.Println("FA received size:", fileSize)
 		}
 	}
 
 	// =========================
-	// PHASE 2: FP (BASE64 ENCODED)
+	// PHASE 2: FP
 	// =========================
 
-	fp := base64.StdEncoding.EncodeToString([]byte("FP" + filePath))
-	sendICMP(conn, dst, iface, []byte(fp))
+	fpPayload := base64.StdEncoding.EncodeToString([]byte("FP" + *filePath))
+	send(conn, dst, iface, []byte(fpPayload))
 
-	fmt.Println("[*] FP sent, receiving FD...")
+	fmt.Println("FP sent")
 
 	var (
-		dataStream string
-		total      int
-		chunks     int
+		stream string
+		total  int
 	)
 
 	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
@@ -143,55 +145,47 @@ func main() {
 		}
 
 		echo := msg.Body.(*icmp.Echo)
-		data := string(echo.Data)
 
-		// debug
-		fmt.Println("[RX]:", data)
-
-		// ignore FP dummy reply
-		if strings.HasPrefix(data, "FP") {
+		decodedBytes, err := base64.StdEncoding.DecodeString(string(echo.Data))
+		if err != nil {
 			continue
 		}
 
-		// =========================
-		// FD HANDLING
-		// =========================
-		if strings.HasPrefix(data, "FD") {
+		data := string(decodedBytes)
+
+		fmt.Println("RX:", data)
+
+		switch {
+
+		case strings.HasPrefix(data, "FP"):
+			fmt.Println("FP dummy reply")
+
+		case strings.HasPrefix(data, "FD"):
 
 			chunk := strings.TrimPrefix(data, "FD")
-			chunk = strings.TrimRight(chunk, "\x00")
 
-			dataStream += chunk
-			chunks++
+			stream += chunk
+			total = len(stream)
 
-			total = len(dataStream)
-
-			fmt.Printf("[+] Chunk %d | %d/%d bytes\n", chunks, total, fileSize)
+			fmt.Printf("FD chunk received | %d/%d\n", total, fileSize)
 		}
 	}
 
-	// =========================
-	// FINAL DECODE
-	// =========================
-
-	decoded, err := base64.StdEncoding.DecodeString(dataStream)
+	decoded, err := base64.StdEncoding.DecodeString(stream)
 	if err != nil {
-		log.Fatalf("Base64 decode failed: %v", err)
+		log.Fatalf("decode error: %v", err)
 	}
 
-	err = os.WriteFile(output, decoded, 0644)
-	if err != nil {
-		log.Fatalf("Write failed: %v", err)
-	}
+	os.WriteFile(*output, decoded, 0644)
 
-	fmt.Println("[+] File written to:", output)
+	fmt.Println("DONE:", *output)
 }
 
 // =========================
-// ICMP SEND FUNCTION
+// SEND (server-like helper)
 // =========================
 
-func sendICMP(conn *icmp.PacketConn, dst *net.IPAddr, iface *net.Interface, payload []byte) {
+func send(conn *icmp.PacketConn, dst *net.IPAddr, iface *net.Interface, payload []byte) {
 
 	msg := icmp.Message{
 		Type: ipv4.ICMPTypeEcho,
@@ -203,23 +197,12 @@ func sendICMP(conn *icmp.PacketConn, dst *net.IPAddr, iface *net.Interface, payl
 		},
 	}
 
-	b, err := msg.Marshal(nil)
-	if err != nil {
-		log.Fatalf("Marshal error: %v", err)
-	}
+	b, _ := msg.Marshal(nil)
 
 	pconn := conn.IPv4PacketConn()
+	pconn.SetControlMessage(ipv4.FlagInterface, true)
 
-	err = pconn.SetControlMessage(ipv4.FlagInterface, true)
-	if err != nil {
-		log.Fatalf("ControlMessage error: %v", err)
-	}
-
-	_, err = pconn.WriteTo(b, &ipv4.ControlMessage{
+	pconn.WriteTo(b, &ipv4.ControlMessage{
 		IfIndex: iface.Index,
 	}, dst)
-
-	if err != nil {
-		log.Fatalf("ICMP send failed: %v", err)
-	}
 }
