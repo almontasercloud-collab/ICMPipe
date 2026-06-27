@@ -17,21 +17,21 @@
 ### 1- ICMPipe Server [Windows]
 
 - Download and install npcap [Here](https://npcap.com/).
-- Download ICMPipe_Server.exe or pull the full repo if you wish to make changes in the source code.
-- Invoke a new cmd with administrator privilage.
+- Download **ICMPipe_Server.exe** or clone the full repository if you want to modify the source code and rebuild ICMPipe server.
+- Run Server With Administrator Privileges.
 - navigate to ICMPipe_Server.exe directory and issue the command: 
 
 ```bash
 .\ICMPipe-Server.exe
 ```
 
-- choose the Client-Connected interface and specfiy it's IP address:
+- Select the interface and client IP address:
 
 ```bash
 For example:  .\ICMPipe-Server.exe 1 172.16.2.5
 ```
 
-- you shoud see a message:
+- Expected output:
 
 ```bash
 "Listening on interface [1] [interface name] for ICMP Echo Requests from 172.16.2.5"
@@ -84,6 +84,7 @@ sudo mv ICMPipe /usr/local/bin && sudo chmod -x /usr/local/bin/ICMPipe
 ICMPipe
 ```
 ## Example Usage: 
+
 ```bash
 ICMPipe -p "full path of the file to be pulled using ICMP" -i "Interface Name eg: eth0" -ip "ICMPipe Server IP" -O "output file path" 
 ```
