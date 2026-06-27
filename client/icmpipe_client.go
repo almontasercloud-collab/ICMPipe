@@ -39,23 +39,21 @@ func main() {
 
 	dst := &net.IPAddr{IP: net.ParseIP(serverIP)}
 
-	fmt.Printf("Using interface: %s (%d)\n", iface.Name, iface.Index)
+	fmt.Printf("[+] Using interface: %s (%d)\n", iface.Name, iface.Index)
 
 	// =========================
-	// PHASE 1: FR REQUEST
+	// PHASE 1: FR (BASE64 ENCODED)
 	// =========================
 
-	frPayload := []byte("FR" + filePath)
-	sendICMP(conn, dst, iface, frPayload)
+	fr := base64.StdEncoding.EncodeToString([]byte("FR" + filePath))
+	sendICMP(conn, dst, iface, []byte(fr))
 
 	buf := make([]byte, 4096)
 
 	var fileSize int
 	found := false
 
-	// =========================
-	// FIXED FA PARSING LOOP
-	// =========================
+	fmt.Println("[*] Waiting for FA...")
 
 	for !found {
 
@@ -73,20 +71,20 @@ func main() {
 			continue
 		}
 
-		echo, ok := msg.Body.(*icmp.Echo)
-		if !ok {
-			continue
-		}
-
+		echo := msg.Body.(*icmp.Echo)
 		data := string(echo.Data)
+
+		// debug
+		fmt.Println("[RX RAW]:", data)
 
 		// ignore FR dummy reply
 		if strings.HasPrefix(data, "FR") {
-			fmt.Println(" -> FR dummy reply received")
 			continue
 		}
 
-		// robust FA extraction (FIX)
+		// =========================
+		// FIXED FA PARSING
+		// =========================
 		if strings.Contains(data, "FA") {
 
 			start := strings.Index(data, "FA")
@@ -100,39 +98,35 @@ func main() {
 
 			size, err := strconv.Atoi(raw)
 			if err != nil {
-				fmt.Println(" -> FA parse failed:", raw)
+				fmt.Println("[!] FA parse error:", raw)
 				continue
 			}
 
 			fileSize = size
 			found = true
 
-			fmt.Printf(" -> FA received. File size: %d bytes\n", fileSize)
+			fmt.Printf("[+] FA received. File size: %d bytes\n", fileSize)
 		}
 	}
 
 	// =========================
-	// PHASE 2: FP REQUEST
+	// PHASE 2: FP (BASE64 ENCODED)
 	// =========================
 
-	fpPayload := []byte("FP" + filePath)
-	sendICMP(conn, dst, iface, fpPayload)
+	fp := base64.StdEncoding.EncodeToString([]byte("FP" + filePath))
+	sendICMP(conn, dst, iface, []byte(fp))
 
-	fmt.Println(" -> FP request sent")
+	fmt.Println("[*] FP sent, receiving FD...")
 
 	var (
-		receivedData string
-		totalBytes   int
-		chunks       int
+		dataStream string
+		total      int
+		chunks     int
 	)
 
 	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 
-	// =========================
-	// RECEIVE FD CHUNKS
-	// =========================
-
-	for totalBytes < fileSize {
+	for total < fileSize {
 
 		n, _, err := conn.ReadFrom(buf)
 		if err != nil {
@@ -148,49 +142,49 @@ func main() {
 			continue
 		}
 
-		echo, ok := msg.Body.(*icmp.Echo)
-		if !ok {
-			continue
-		}
-
+		echo := msg.Body.(*icmp.Echo)
 		data := string(echo.Data)
+
+		// debug
+		fmt.Println("[RX]:", data)
 
 		// ignore FP dummy reply
 		if strings.HasPrefix(data, "FP") {
-			fmt.Println(" -> FP dummy reply received")
 			continue
 		}
 
+		// =========================
+		// FD HANDLING
+		// =========================
 		if strings.HasPrefix(data, "FD") {
 
 			chunk := strings.TrimPrefix(data, "FD")
 			chunk = strings.TrimRight(chunk, "\x00")
 
-			receivedData += chunk
+			dataStream += chunk
 			chunks++
 
-			totalBytes = len(receivedData)
+			total = len(dataStream)
 
-			fmt.Printf(" -> Chunk %d received | total bytes: %d / %d\n",
-				chunks, totalBytes, fileSize)
+			fmt.Printf("[+] Chunk %d | %d/%d bytes\n", chunks, total, fileSize)
 		}
 	}
 
 	// =========================
-	// DECODE + WRITE FILE
+	// FINAL DECODE
 	// =========================
 
-	decoded, err := base64.StdEncoding.DecodeString(receivedData)
+	decoded, err := base64.StdEncoding.DecodeString(dataStream)
 	if err != nil {
 		log.Fatalf("Base64 decode failed: %v", err)
 	}
 
 	err = os.WriteFile(output, decoded, 0644)
 	if err != nil {
-		log.Fatalf("File write failed: %v", err)
+		log.Fatalf("Write failed: %v", err)
 	}
 
-	fmt.Println(" -> File written to:", output)
+	fmt.Println("[+] File written to:", output)
 }
 
 // =========================
