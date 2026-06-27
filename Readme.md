@@ -5,11 +5,6 @@
 
 **ICMPipe** is an ICMP-based client/server communication experiment built with Go and libpcap. Exploring packet-level data transport over raw network protocols.
 
-## Features
-
-- **Raw Socket Interaction:** Directly crafts and parses custom ICMP payloads.
-- **Stealth & Diagnostics:** Ideal for advanced network architecture testing, firewall behavior analysis, and environment validation.
-
 ---
 
 ## Installation
@@ -18,7 +13,7 @@
 
 - Download and install npcap [Here](https://npcap.com/).
 - Download **ICMPipe_Server.exe** or clone the full repository if you want to modify the source code and rebuild ICMPipe server.
-- Run Server With Administrator Privileges.
+- Run Server with Administrator Privileges.
 - navigate to ICMPipe_Server.exe directory and issue the command: 
 
 ```bash
