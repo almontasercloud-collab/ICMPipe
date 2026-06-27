@@ -44,7 +44,7 @@ For example:  .\ICMPipe-Server.exe 1 172.16.2.5
 ```bash
 sudo apt install golang -y
 ```
-- Install libpcap:
+- Install libpcap Development Package:
 
 ```bash
 apt install libpcap-dev
@@ -56,30 +56,34 @@ apt install libpcap-dev
 https://github.com/almontasercloud-collab/ICMPipe/blob/main/client/icmpipe_client.go
 ```
 
-- navigate to icmpipe_client.go and initiate go:
+- navigate to directory containing **icmpipe_client.go** file and Initialize Go:
 
 ```bash
 go mod init icmpipe_client.go
 ```
-- use tidy to download dependancies:
+- download and configure the required Go dependencies:
 
 ```bash
 go mod tidy
 ```
 
-- Build ICMPipe Executable:
+- Build ICMPipe client:
 
 ```bash
 go build -o ICMPipe icmpope_client.go
 ```
 
-- Move the executable to your system bin and adjust privilages: (optinal)(recommended)
+- Install ICMPipe globally and set execution permissions: (Optinal Recommended)
 
 ```bash
 sudo mv ICMPipe /usr/local/bin && sudo chmod -x /usr/local/bin/ICMPipe
 ```
-- Issue the command **ICMPipe** to see command usage for example: 
+- Display available options:
 
+```bash
+ICMPipe
+```
+## Example Usage: 
 ```bash
 ICMPipe -p "full path of the file to be pulled using ICMP" -i "Interface Name eg: eth0" -ip "ICMPipe Server IP" -O "output file path" 
 ```
