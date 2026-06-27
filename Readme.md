@@ -79,6 +79,8 @@ sudo mv ICMPipe /usr/local/bin && sudo chmod -x /usr/local/bin/ICMPipe
 ICMPipe
 ```
 
+---
+
 ## Documentation & Walkthrough
 
 A complete ICMPipe walkthrough, including setup steps and usage examples, is available on my blog:
