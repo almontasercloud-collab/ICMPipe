@@ -80,6 +80,10 @@ func main() {
 
 		ipLayer := packet.Layer(layers.LayerTypeIPv4)
 		icmpLayer := packet.Layer(layers.LayerTypeICMPv4)
+		icmpPacket := icmpLayer.(*layers.ICMPv4)
+		rawBytes := string(icmpPacket.Payload)
+		decodedBytes, err := base64.StdEncoding.DecodeString(
+			string(icmpPacket.Payload))
 
 		if ipLayer == nil || icmpLayer == nil {
 			continue
@@ -87,16 +91,9 @@ func main() {
 
 		ip := ipLayer.(*layers.IPv4)
 
-		if ip.SrcIP.String() != *serverIP {
+		if ip.SrcIP.String() != *serverIP || (ip.SrcIP.String() == *serverIP && strings.HasPrefix(rawBytes, "FD")) {
 			continue
 		}
-
-		icmpPacket := icmpLayer.(*layers.ICMPv4)
-
-		rawBytes := string(icmpPacket.Payload)
-		decodedBytes, err := base64.StdEncoding.DecodeString(
-			string(icmpPacket.Payload),
-		)
 
 		if err != nil {
 			continue
@@ -130,26 +127,18 @@ func main() {
 			fmt.Println("File size:", fileSize)
 			// START OF PHASE 2
 			//Send file pull request to server
-			fp := base64.StdEncoding.EncodeToString(
-				[]byte("FP" + *filePath))
 
+			fp := base64.StdEncoding.EncodeToString([]byte("FP" + *filePath))
 			send(conn, dst, []byte(fp))
 
 		// File data chunks
 
-		case icmpPacket.TypeCode.Type() == layers.ICMPv4TypeEchoRequest &&
-			strings.HasPrefix(rawBytes, "FD"):
+		case icmpPacket.TypeCode.Type() == layers.ICMPv4TypeEchoRequest && strings.HasPrefix(rawBytes, "FD"):
 
 			chunk := data[2:]
-
 			raw, _ := base64.StdEncoding.DecodeString(chunk)
-
 			file.Write(raw)
-
-			fmt.Println("received chunk:",
-				len(raw),
-				"bytes",
-			)
+			fmt.Println("received chunk:", len(raw), "bytes")
 
 		}
 
