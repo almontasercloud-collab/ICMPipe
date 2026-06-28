@@ -130,34 +130,11 @@ func main() {
 			fmt.Println("File size:", fileSize)
 			// START OF PHASE 2
 			//Send file pull request to server
-			fmt.Println("Sending File Pull ICMP Request to ICMPipe server.")
-			payloadBytes := []byte("FP")
+			fp := base64.StdEncoding.EncodeToString(
+				[]byte("FP" + *filePath),
+			)
 
-			//Sending File Pull ICMP Request
-			windowsPayload := []byte("abcdefghijklmnopqrstuvwabcdefg") // 30 bytes
-			encodedFP := base64.StdEncoding.EncodeToString(append(payloadBytes, windowsPayload...))
-
-			request := &icmp.Message{
-				Type: ipv4.ICMPTypeEcho,
-				Code: 0,
-				Body: &icmp.Echo{
-					ID:   int(icmpPacket.Id),
-					Seq:  int(icmpPacket.Seq + 130),
-					Data: []byte(encodedFP),
-				},
-			}
-
-			requestBytes, err := request.Marshal(nil)
-			if err != nil {
-				log.Printf("Failed to marshal FP request Bytes: %v", err)
-			}
-
-			// Sending File Pull ICMP Request
-			fpDst := &net.IPAddr{IP: ip.SrcIP}
-			_, err = conn.WriteTo(requestBytes, fpDst)
-			if err != nil {
-				log.Printf("Failed to send File Pull ICMP request: %v", err)
-			}
+			send(conn, dst, []byte(fP))
 
 		// File data chunks
 
