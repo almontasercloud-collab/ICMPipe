@@ -9,188 +9,175 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
+	"github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
+	"github.com/google/gopacket/pcap"
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv4"
 )
 
+var fileSize int
+
 func main() {
 
 	filePath := flag.String("p", "", "file path")
-	ifaceName := flag.String("i", "", "interface")
+	ifaceID := flag.Int("i", 0, "interface ID")
 	serverIP := flag.String("ip", "", "server ip")
 	output := flag.String("O", "", "output file")
 
 	flag.Parse()
 
-	if *filePath == "" || *ifaceName == "" || *serverIP == "" || *output == "" {
-		fmt.Println("Usage: ICMPipe -p <file> -i <iface> -ip <server> -O <out>")
-		os.Exit(1)
+	listInterfaces()
+
+	if *filePath == "" || *ifaceID == 0 || *serverIP == "" || *output == "" {
+		fmt.Println("Usage: ICMPipe -p <file> -i <iface_id> -ip <server> -O <out>")
+		return
 	}
 
-	iface, err := net.InterfaceByName(*ifaceName)
+	iface, err := net.InterfaceByIndex(*ifaceID)
+
 	if err != nil {
-		log.Fatalf("iface error: %v", err)
+		log.Fatal(err)
 	}
+
+	handle, err := pcap.OpenLive(iface.Name, 1600, true, pcap.BlockForever)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer handle.Close()
 
 	conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
+
 	if err != nil {
-		log.Fatalf("icmp error: %v", err)
+		log.Fatal(err)
 	}
+
 	defer conn.Close()
 
-	dst := &net.IPAddr{IP: net.ParseIP(*serverIP)}
+	dst := &net.IPAddr{
+		IP: net.ParseIP(*serverIP),
+	}
 
-	buf := make([]byte, 4096)
+	// send file request
 
-	// =========================
-	// PHASE 1: FR
-	// =========================
+	fr := base64.StdEncoding.EncodeToString(
+		[]byte("FR" + *filePath),
+	)
 
-	frPayload := base64.StdEncoding.EncodeToString([]byte("FR" + *filePath))
-	send(conn, dst, iface, []byte(frPayload))
+	send(conn, dst, []byte(fr))
 
-	var fileSize int
-	found := false
+	fmt.Println("Waiting for FA...")
 
-	fmt.Println("Waiting FA...")
+	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 
-	for !found {
+	file, err := os.Create(*output)
 
-		n, _, err := conn.ReadFrom(buf)
-		if err != nil {
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer file.Close()
+
+	for packet := range packetSource.Packets() {
+
+		ipLayer := packet.Layer(layers.LayerTypeIPv4)
+		icmpLayer := packet.Layer(layers.LayerTypeICMPv4)
+
+		if ipLayer == nil || icmpLayer == nil {
 			continue
 		}
 
-		msg, err := icmp.ParseMessage(1, buf[:n])
-		if err != nil {
+		ip := ipLayer.(*layers.IPv4)
+
+		if ip.SrcIP.String() != *serverIP {
 			continue
 		}
 
-		if msg.Type != ipv4.ICMPTypeEchoReply {
-			continue
-		}
+		icmpPacket := icmpLayer.(*layers.ICMPv4)
 
-		echo := msg.Body.(*icmp.Echo)
+		decodedBytes, err := base64.StdEncoding.DecodeString(
+			string(icmpPacket.Payload),
+		)
 
-		decodedBytes, err := base64.StdEncoding.DecodeString(string(echo.Data))
 		if err != nil {
 			continue
 		}
 
 		data := string(decodedBytes)
 
-		fmt.Println("Directory:", data)
-
 		switch {
 
-		case msg.Type == ipv4.ICMPTypeEchoReply &&
-			strings.HasPrefix(data, "FR"):
-
-			// This is the server dummy reply
-			fmt.Println("FR dummy reply received")
-
-		case msg.Type == ipv4.ICMPTypeEcho &&
+		// Server sends FA with size
+		case icmpPacket.TypeCode.Type() == layers.ICMPv4TypeEchoRequest &&
 			strings.HasPrefix(data, "FA"):
 
-			// This is the real server request containing file size
+			first := 2
 
-			start := strings.Index(data, "FA")
-			end := strings.LastIndex(data, "FA")
+			second := strings.Index(data[first:], "FA")
 
-			if start == -1 || end <= start {
+			if second == -1 {
 				continue
 			}
 
-			raw := data[start+2 : end]
+			second += first
 
-			size, err := strconv.Atoi(raw)
+			rawSize := data[first:second]
+
+			fileSize, err = strconv.Atoi(rawSize)
+
 			if err != nil {
 				continue
 			}
 
-			fileSize = size
-			found = true
+			fmt.Println("File size:", fileSize)
 
-			fmt.Println("FA received size:", fileSize)
+		// File data chunks
+
+		case icmpPacket.TypeCode.Type() == layers.ICMPv4TypeEchoRequest &&
+			strings.HasPrefix(data, "FD"):
+
+			chunk := data[2:]
+
+			raw, _ := base64.StdEncoding.DecodeString(chunk)
+
+			file.Write(raw)
+
+			fmt.Println("received chunk:",
+				len(raw),
+				"bytes",
+			)
+
 		}
+
 	}
 
-	// =========================
-	// PHASE 2: FP
-	// =========================
-
-	fpPayload := base64.StdEncoding.EncodeToString([]byte("FP" + *filePath))
-	send(conn, dst, iface, []byte(fpPayload))
-
-	fmt.Println("FP sent")
-
-	var (
-		stream string
-		total  int
-	)
-
-	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-
-	for total < fileSize {
-
-		n, _, err := conn.ReadFrom(buf)
-		if err != nil {
-			continue
-		}
-
-		msg, err := icmp.ParseMessage(1, buf[:n])
-		if err != nil {
-			continue
-		}
-
-		if msg.Type != ipv4.ICMPTypeEchoReply {
-			continue
-		}
-
-		echo := msg.Body.(*icmp.Echo)
-
-		decodedBytes, err := base64.StdEncoding.DecodeString(string(echo.Data))
-		if err != nil {
-			continue
-		}
-
-		data := string(decodedBytes)
-
-		fmt.Println("RX:", data)
-
-		switch {
-
-		case strings.HasPrefix(data, "FP"):
-			fmt.Println("FP dummy reply")
-
-		case strings.HasPrefix(data, "FD"):
-
-			chunk := strings.TrimPrefix(data, "FD")
-
-			stream += chunk
-			total = len(stream)
-
-			fmt.Printf("FD chunk received | %d/%d\n", total, fileSize)
-		}
-	}
-
-	decoded, err := base64.StdEncoding.DecodeString(stream)
-	if err != nil {
-		log.Fatalf("decode error: %v", err)
-	}
-
-	os.WriteFile(*output, decoded, 0644)
-
-	fmt.Println("DONE:", *output)
 }
 
-// =========================
-// SEND (server-like helper)
-// =========================
+func listInterfaces() {
+	fmt.Println("Available network interfaces:")
 
-func send(conn *icmp.PacketConn, dst *net.IPAddr, iface *net.Interface, payload []byte) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		log.Fatalf("cannot list interfaces: %v", err)
+	}
+
+	for _, iface := range interfaces {
+		fmt.Printf("\nID: %d\n", iface.Index)
+		fmt.Printf("Name: %s\n", iface.Name)
+		fmt.Printf("MAC: %s\n", iface.HardwareAddr)
+
+		addrs, _ := iface.Addrs()
+
+		for _, addr := range addrs {
+			fmt.Printf("IP: %s\n", addr.String())
+		}
+	}
+}
+
+func send(conn *icmp.PacketConn, dst *net.IPAddr, payload []byte) {
 
 	msg := icmp.Message{
 		Type: ipv4.ICMPTypeEcho,
@@ -202,12 +189,17 @@ func send(conn *icmp.PacketConn, dst *net.IPAddr, iface *net.Interface, payload 
 		},
 	}
 
-	b, _ := msg.Marshal(nil)
+	bytes, err := msg.Marshal(nil)
 
-	pconn := conn.IPv4PacketConn()
-	pconn.SetControlMessage(ipv4.FlagInterface, true)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
-	pconn.WriteTo(b, &ipv4.ControlMessage{
-		IfIndex: iface.Index,
-	}, dst)
+	_, err = conn.WriteTo(bytes, dst)
+
+	if err != nil {
+		log.Println("send error:", err)
+	}
+
 }
