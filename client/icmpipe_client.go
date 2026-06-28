@@ -39,7 +39,7 @@ func main() {
 	}
 
 	// Open interface for sniffing
-	handle, err := pcap.OpenLive(iface, 1600, true, pcap.BlockForever)
+	handle, err := pcap.OpenLive(iface.Name, 1600, true, pcap.BlockForever)
 	if err != nil {
 		log.Fatalf("Error opening interface: %v", err)
 	}
@@ -93,6 +93,7 @@ func main() {
 
 		icmpPacket := icmpLayer.(*layers.ICMPv4)
 
+		rawBytes := string(icmpPacket.Payload)
 		decodedBytes, err := base64.StdEncoding.DecodeString(
 			string(icmpPacket.Payload),
 		)
@@ -104,7 +105,6 @@ func main() {
 		data := string(decodedBytes)
 
 		switch {
-
 		// Server sends FA with size
 		case icmpPacket.TypeCode.Type() == layers.ICMPv4TypeEchoRequest &&
 			strings.HasPrefix(data, "FA"):
@@ -131,15 +131,14 @@ func main() {
 			// START OF PHASE 2
 			//Send file pull request to server
 			fp := base64.StdEncoding.EncodeToString(
-				[]byte("FP" + *filePath),
-			)
+				[]byte("FP" + *filePath))
 
-			send(conn, dst, []byte(fP))
+			send(conn, dst, []byte(fp))
 
 		// File data chunks
 
 		case icmpPacket.TypeCode.Type() == layers.ICMPv4TypeEchoRequest &&
-			strings.HasPrefix(data, "FD"):
+			strings.HasPrefix(rawBytes, "FD"):
 
 			chunk := data[2:]
 

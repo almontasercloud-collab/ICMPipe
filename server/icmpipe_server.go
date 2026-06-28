@@ -248,7 +248,7 @@ func main() {
 
 						count++
 
-						log.Printf("Chunk number %d Sent. waiting for Dummy FD . . .", count) // Delay to recive Dummy FD from client before sending next chunk
+						log.Printf("Chunk number %d Sent.", count) // Delay to recive Dummy FD from client before sending next chunk
 						delay := time.Duration(rand.Intn(9000)) * time.Millisecond
 						time.Sleep(delay)
 					}
