@@ -79,31 +79,33 @@ func main() {
 
 				case strings.HasPrefix(StringDecodedBytes, "FR"):
 
-					// First Step Is to Send File request Dummy ICMP Reply
-					reply := &icmp.Message{
-						Type: ipv4.ICMPTypeEchoReply,
-						Code: 0,
-						Body: &icmp.Echo{
-							ID:   int(icmpPacket.Id),
-							Seq:  int(icmpPacket.Seq),
-							Data: []byte(icmpPacket.Payload), // <- standard windows size must be enforced at client
-						},
-					}
+					// First Step Is to Send File request Dummy ICMP Reply uncomment this section if you want to send a dummy reply to the client
+					/*
+						reply := &icmp.Message{
+							Type: ipv4.ICMPTypeEchoReply,
+							Code: 0,
+							Body: &icmp.Echo{
+								ID:   int(icmpPacket.Id),
+								Seq:  int(icmpPacket.Seq),
+								Data: []byte(icmpPacket.Payload), // <- standard windows size must be enforced at client
+							},
+						}
 
-					replyBytes, err := reply.Marshal(nil)
-					if err != nil {
-						log.Printf("Failed to marshal reply: %v", err)
-					}
+						replyBytes, err := reply.Marshal(nil)
+						if err != nil {
+							log.Printf("Failed to marshal reply: %v", err)
+						}
 
-					// Sending File request Dummy ICMP Reply
+						// Sending File request Dummy ICMP Reply
 
-					dst := &net.IPAddr{IP: ip.SrcIP}
-					_, err = conn.WriteTo(replyBytes, dst)
-					if err != nil {
-						log.Printf("Failed to send File request Dummy ICMP reply: %v", err)
-					} else {
-						fmt.Printf(" -> File request Dummy_ICMP_Reply sent to %s\n", allowedIP)
-					}
+						dst := &net.IPAddr{IP: ip.SrcIP}
+						_, err = conn.WriteTo(replyBytes, dst)
+						if err != nil {
+							log.Printf("Failed to send File request Dummy ICMP reply: %v", err)
+						} else {
+							fmt.Printf(" -> File request Dummy_ICMP_Reply sent to %s\n", allowedIP)
+						}
+					*/
 
 					//Second Step is Checking if the requested file Exists and its size
 					dir := string(StringDecodedBytes)[2:]
@@ -126,6 +128,7 @@ func main() {
 
 					// Third Step is Sending File Acknoledgement ICMP Request
 					windowsPayload := []byte("abcdefghijklmnopqrstuvwabcdefg") // 30 bytes
+					encodedFA := base64.StdEncoding.EncodeToString(append(payloadBytes, windowsPayload...))
 
 					request := &icmp.Message{
 						Type: ipv4.ICMPTypeEcho,
@@ -133,7 +136,7 @@ func main() {
 						Body: &icmp.Echo{
 							ID:   int(icmpPacket.Id),
 							Seq:  int(icmpPacket.Seq + 130),
-							Data: append(payloadBytes, windowsPayload...), // <- standard windows icmp payload size
+							Data: []byte(encodedFA),
 						},
 					}
 
@@ -160,31 +163,33 @@ func main() {
 
 				case strings.HasPrefix(StringDecodedBytes, "FP"):
 
-					// First Step Is to Send File Pull Dummy ICMP Reply
-					reply := &icmp.Message{
-						Type: ipv4.ICMPTypeEchoReply,
-						Code: 0,
-						Body: &icmp.Echo{
-							ID:   int(icmpPacket.Id),
-							Seq:  int(icmpPacket.Seq),
-							Data: []byte(icmpPacket.Payload), // <- standard windows size must be enforced at client
-						},
-					}
+					// First Step Is to Send File Pull Dummy ICMP Reply uncomment this section if you want to send a dummy reply to the client
+					/*
+						reply := &icmp.Message{
+							Type: ipv4.ICMPTypeEchoReply,
+							Code: 0,
+							Body: &icmp.Echo{
+								ID:   int(icmpPacket.Id),
+								Seq:  int(icmpPacket.Seq),
+								Data: []byte(icmpPacket.Payload), // <- standard windows size must be enforced at client
+							},
+						}
 
-					replyBytes, err := reply.Marshal(nil)
-					if err != nil {
-						log.Printf("Failed to marshal FP reply: %v", err)
-					}
+						replyBytes, err := reply.Marshal(nil)
+						if err != nil {
+							log.Printf("Failed to marshal FP reply: %v", err)
+						}
 
-					// Sending File request Dummy ICMP Reply
+						// Sending File request Dummy ICMP Reply
 
-					dst := &net.IPAddr{IP: ip.SrcIP}
-					_, err = conn.WriteTo(replyBytes, dst)
-					if err != nil {
-						log.Printf("Failed to send File pull Dummy ICMP reply: %v", err)
-					} else {
-						fmt.Printf(" -> File pull Dummy ICMP reply sent to %s:\n", allowedIP)
-					}
+						dst := &net.IPAddr{IP: ip.SrcIP}
+						_, err = conn.WriteTo(replyBytes, dst)
+						if err != nil {
+							log.Printf("Failed to send File pull Dummy ICMP reply: %v", err)
+						} else {
+							fmt.Printf(" -> File pull Dummy ICMP reply sent to %s:\n", allowedIP)
+						}
+					*/
 
 					//Second Step is to read the file, prepare chunks and send them
 
