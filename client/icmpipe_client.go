@@ -22,37 +22,32 @@ var fileSize int
 func main() {
 
 	filePath := flag.String("p", "", "file path")
-	ifaceID := flag.Int("i", 0, "interface ID")
+	ifaceName := flag.String("i", "", "interface")
 	serverIP := flag.String("ip", "", "server ip")
 	output := flag.String("O", "", "output file")
 
 	flag.Parse()
 
-	listInterfaces()
-
-	if *filePath == "" || *ifaceID == 0 || *serverIP == "" || *output == "" {
-		fmt.Println("Usage: ICMPipe -p <file> -i <iface_id> -ip <server> -O <out>")
-		return
+	if *filePath == "" || *ifaceName == "" || *serverIP == "" || *output == "" {
+		fmt.Println("Usage: ICMPipe -p <file> -i <iface> -ip <server> -O <out>")
+		os.Exit(1)
 	}
 
-	iface, err := net.InterfaceByIndex(*ifaceID)
-
+	iface, err := net.InterfaceByName(*ifaceName)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("iface error: %v", err)
 	}
 
-	handle, err := pcap.OpenLive(iface.Name, 1600, true, pcap.BlockForever)
-
+	// Open interface for sniffing
+	handle, err := pcap.OpenLive(iface, 1600, true, pcap.BlockForever)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error opening interface: %v", err)
 	}
-
 	defer handle.Close()
 
 	conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
-
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("icmp error: %v", err)
 	}
 
 	defer conn.Close()
