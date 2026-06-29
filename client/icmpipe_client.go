@@ -65,7 +65,7 @@ func main() {
 
 	send(conn, dst, []byte(fr))
 
-	fmt.Println("Waiting for FA...")
+	fmt.Println("Waiting for ICMPipe server response ...")
 
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 
@@ -130,7 +130,7 @@ PacketLoop:
 				continue
 			}
 
-			fmt.Println("File size:", fileSize)
+			fmt.Println("Requested file is found. File size:", fileSize)
 
 			// START OF PHASE 2
 
