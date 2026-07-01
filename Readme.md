@@ -39,7 +39,7 @@ curl -O https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/cl
 git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
-- Run a cmd with Administrator Privileges.(go to windows start menu and type cmd, then right click and select run as Administrator)
+- Run Command Prompt with Administrator privileges.
 - navigate to ICMPipe_Server.exe directory and issue bellow command to check host devices and command usage: 
 
 ```bash
