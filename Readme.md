@@ -139,3 +139,9 @@ sudo ICMPipe-Client -p "C:\Users\Administrator\Documents\test.txt" -i eth0 -ip 1
      - `FP` — File Preparation / Processing
      - `FD` — File Data Transfer
    - Provide clearer state transitions and better communication flow control.
+
+## Documentation
+
+A complete source build guide and step-by-step ICMPipe testing walkthrough are available on my blog:
+
+**[ICMPipe Build & Testing Guide](https://almontaserbabiker.com/posts/welcome-post/)**
