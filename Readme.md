@@ -21,7 +21,6 @@ ICMPipe is an experimental ICMP-based client/server communication system built w
 
 - Go 1.16+
 - libpcap library and development headers
-- Linux/Unix environment with raw socket capabilities
 - This demo code can be built for both windows and linux enviroments. however, for bellow tests **use windows as a server and linux as client**. 
 
 ### 1- ICMPipe Server [Windows]
