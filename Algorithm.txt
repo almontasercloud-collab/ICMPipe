@@ -1,7 +1,7 @@
-FR = File request.
-FA = File Acknowledgment.
-FP = File pull.
-FD = File data.
+FR = File request
+FA = File Acknowledgment
+FP = File pull
+FD = File data
 
 Phase 1:
 
