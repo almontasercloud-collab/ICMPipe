@@ -34,7 +34,7 @@ git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
 
-- Or download **ICMPipe_Server.exe**:
+- Or download **ICMPipe_Server.exe** only:
 
 ```bash
 curl -O https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/icmpipe_client.go
