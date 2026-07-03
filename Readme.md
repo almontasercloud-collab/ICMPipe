@@ -86,7 +86,7 @@ git clone https://github.com/almontasercloud-collab/ICMPipe.git
 - Display command usage:
 
 ```bash
-sudo ICMPipe-Client
+sudo ./ICMPipe-Client
 ```
 - **(Example)** Select the file, interface, server IP and output path:
 
