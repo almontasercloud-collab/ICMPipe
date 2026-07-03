@@ -33,7 +33,7 @@ ICMPipe is an experimental ICMP-based client/server communication system built w
 curl -O https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/icmpipe_client.go
 ```
 
-- Or clone the full repository if you want to modify the source code and rebuild ICMPipe server: **(Optional)**
+- **(Optional)** Or clone the full repository if you want to modify the source code and rebuild ICMPipe server: 
 
 ```bash
 git clone https://github.com/almontasercloud-collab/ICMPipe.git
@@ -77,13 +77,13 @@ apt install libpcap-dev
 wget https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/ICMPipe-Client
 ```
 
-- Or clone the full repository if you want to modify the source code and rebuild ICMPipe server: **(Optional)**
+- **(Optional)** Or clone the full repository if you want to modify the source code and rebuild ICMPipe server: 
 
 ```bash
 git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
-- Install ICMPipe globally and set execution permissions: **(Optinal)**
+- **(Optinal)** Install ICMPipe globally and set execution permissions:
 
 ```bash
 sudo mv ./ICMPipe-Client /usr/local/bin && sudo chmod 755 /usr/local/bin/ICMPipe
