@@ -26,16 +26,18 @@ ICMPipe is an experimental ICMP-based client/server communication system built w
 ### 1- ICMPipe Server [Windows]
 
 - Download and install npcap [Here](https://npcap.com/).
+
+- Clone the full repository if you want to modify the source code and rebuild ICMPipe server: (**optional**, only required for rebuilding) 
+
+```bash
+git clone https://github.com/almontasercloud-collab/ICMPipe.git
+```
+
+
 - Download **ICMPipe_Server.exe**:
 
 ```bash
 curl -O https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/icmpipe_client.go
-```
-
-- **(Optional)** Or clone the full repository if you want to modify the source code and rebuild ICMPipe server: 
-
-```bash
-git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
 - Run Command Prompt with Administrator privileges.
