@@ -34,7 +34,7 @@ git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
 
-- Download **ICMPipe_Server.exe**:
+- Or download **ICMPipe_Server.exe**:
 
 ```bash
 curl -O https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/icmpipe_client.go
@@ -78,7 +78,7 @@ apt install libpcap-dev
 git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
-- Download **ICMPipe_Client** from this repo:
+- Or download **ICMPipe_Client** only from this repo:
 
 ```bash
 wget https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/ICMPipe-Client
