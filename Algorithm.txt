@@ -23,5 +23,5 @@ Reply(Client): Here Is the Second Chunk of the file (FD:Data).<- Dummy //ICMP TY
 
 . . .
 
-reassemble Payloads in the file specified in -O flag
-stop if collected Payloads total size >= size in FA
+Reassemble Payloads
+Stop if collected Payloads total size >= size in FA
