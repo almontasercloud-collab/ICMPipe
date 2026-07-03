@@ -144,4 +144,4 @@ sudo ICMPipe-Client -p "C:\Users\Administrator\Documents\test.txt" -i eth0 -ip 1
 
 A complete source build guide and step-by-step ICMPipe testing walkthrough are available on my blog:
 
-**[ICMPipe Build & Testing Guide](https://almontaserbabiker.com/posts/welcome-post/)**
+**[ICMPipe Build & Testing Guide](https://almontaserbabiker.com/posts/ICMPipe/)**
