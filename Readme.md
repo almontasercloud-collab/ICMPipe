@@ -60,7 +60,7 @@ Listening on interface [1] [interface name] for ICMP Echo Requests from 172.16.2
 
 ### 2- ICMPipe Client [Linux]
 
-- Install golang:
+- **(Optional)** Install golang: (only if you want to modify the source code and rebuild ICMPipe)
 
 ```bash
 sudo apt install golang -y
