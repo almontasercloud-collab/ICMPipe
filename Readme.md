@@ -60,7 +60,7 @@ Listening on interface [1] [interface name] for ICMP Echo Requests from 172.16.2
 
 ### 2- ICMPipe Client [Linux]
 
-- **(Optional)** Install golang: (only if you want to modify the source code and rebuild ICMPipe)
+- Install golang: (**optional**, only required for rebuilding):
 
 ```bash
 sudo apt install golang -y
@@ -77,13 +77,13 @@ apt install libpcap-dev
 wget https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/ICMPipe-Client
 ```
 
-- **(Optional)** Or clone the full repository if you want to modify the source code and rebuild ICMPipe server: 
+- or clone the full repository if you want to modify the source code and rebuild ICMPipe server: (**optional**, only required for rebuilding):
 
 ```bash
 git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
-- Add execution permition
+- Make the Binary Executable
 
 ```bash
 sudo chmod 775 ./ICMPipe-Client
