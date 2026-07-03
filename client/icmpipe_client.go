@@ -57,7 +57,7 @@ func main() {
 	}
 
 	// START OF PHASE 1
-	// send file request
+	// Send file request
 
 	fr := base64.StdEncoding.EncodeToString(
 		[]byte("FR" + *filePath),
