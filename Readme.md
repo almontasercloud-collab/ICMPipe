@@ -116,7 +116,7 @@ sudo ICMPipe -p "C:\Users\Administrator\Documents\test.txt" -i eth0 -ip 172.16.2
 ## What's Next: 
 #### The implementation acts as a reference execution layer for the algorithm. It handles packet capture, encoding/decoding, and transport simulation using ICMP, but does not represent the final architecture or optimized design. **Let's agree that it's a proof that this method actually works !**
 
-### So what are the "nice to have" features if ICMPipe2 saw the light: 
+### Engineering Requirements for a Full Implementation: 
 1. **Remove `libpcap` dependency**
    - Replace external packet capture dependency with lower-level packet processing mechanisms and OS-native networking APIs.
    - Improve portability, control, and integration with the underlying operating system.
