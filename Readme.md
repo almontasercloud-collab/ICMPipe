@@ -72,16 +72,16 @@ sudo apt install golang -y
 apt install libpcap-dev
 ```
 
+- Clone the full repository if you want to modify the source code and rebuild ICMPipe client: (**optional**, only required for rebuilding):
+
+```bash
+git clone https://github.com/almontasercloud-collab/ICMPipe.git
+```
+
 - Download **ICMPipe_Client** from this repo:
 
 ```bash
 wget https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/ICMPipe-Client
-```
-
-- or clone the full repository if you want to modify the source code and rebuild ICMPipe server: (**optional**, only required for rebuilding):
-
-```bash
-git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
 - Make the Binary Executable
