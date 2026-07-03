@@ -113,7 +113,6 @@ PacketLoop:
 			strings.HasPrefix(data, "FA"):
 
 			first := 2
-
 			second := strings.Index(data[first:], "FA")
 
 			if second == -1 {
@@ -121,17 +120,22 @@ PacketLoop:
 			}
 
 			second += first
+			payload := data[first:second]
 
-			rawSize := data[first:second]
-
-			fileSize, err = strconv.Atoi(rawSize)
-
-			if err != nil {
-				continue
+			// Case 1: File not found
+			if payload == "File not found" {
+				log.Println("Server responded: File not found")
+				return
 			}
 
-			fmt.Println("Requested file is found. File size:", fileSize)
+			// Case 2: File size
+			fileSize, err = strconv.Atoi(payload)
+			if err != nil {
+				log.Printf("Invalid file size received: %v", err)
+				return
+			}
 
+			fmt.Printf("Requested file found. File size: %d bytes\n", fileSize)
 			// START OF PHASE 2
 
 			//Send file pull request to server

