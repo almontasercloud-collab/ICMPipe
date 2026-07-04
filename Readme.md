@@ -104,44 +104,9 @@ sudo ICMPipe-Client -p "C:\Users\Administrator\Documents\test.txt" -i eth0 -ip 1
 
 - The runtime logs now show the transfer workflow clearly, including transfer initiation, file parameters, and data chunk exchanges on both the client and server terminals. Additionally, when using a packet analysis tool (e.g., Wireshark) during the exchange, the algorithm execution steps can be observed directly as they are translated into network packets and transfer operations.
 
-## What's Next: 
-#### The implementation acts as a reference execution layer for the algorithm. It handles packet capture, encoding/decoding, and transport simulation using ICMP, but does not represent the final architecture or optimized design. **Let's agree that it's a proof that this method actually works !**
-
-### Engineering Requirements for a Full Implementation: 
-1. **Remove `libpcap` dependency**
-   - Replace external packet capture dependency with lower-level packet processing mechanisms and OS-native networking APIs.
-   - Improve portability, control, and integration with the underlying operating system.
-
-2. **Modular refactoring**
-   - Refactor repeated logic into structured, reusable, and testable components.
-   - Improve maintainability and prepare the codebase for future expansion.
-
-3. **Introduce a structured packet-processing pipeline**
-   - Separate packet creation, parsing, validation, processing, and response handling into dedicated stages.
-   - Establish a cleaner internal architecture for protocol operations.
-
-4. **Improve protocol robustness and error handling**
-   - Enhance state management, validation, recovery mechanisms, and failure handling.
-   - Improve reliability during different communication scenarios.
-
-5. **Expand channel functionality**
-   - Extend beyond basic file transfer capabilities.
-   - Introduce structured operations such as remote file system navigation and controlled channel interactions.
-
-6. **Improve packet size management**
-   - Implement better packet sizing control for both Phase 1 and Phase 2 communication stages.
-   - Optimize transfer reliability and efficiency.
-
-7. **Enhance transfer lifecycle management**
-   - Improve handling and control of all main protocol stages:
-     - `FR` — File Request
-     - `FA` — File Acknowledgement
-     - `FP` — File Preparation / Processing
-     - `FD` — File Data Transfer
-   - Provide clearer state transitions and better communication flow control.
 
 ## Documentation
 
-A complete source build guide and step-by-step ICMPipe testing walkthrough are available on my blog:
+ICMPipe testing and walkthrough are available on my blog:
 
 **[ICMPipe Build & Testing Guide](https://almontaserbabiker.com/posts/ICMPipe/)**
